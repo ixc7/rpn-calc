@@ -13,6 +13,14 @@
 const _B = '\x1b[1m'
 const B_ = '\x1b[0m'
 
+const operators = {
+  "+": (a, b) => a + b,
+  "-": (a, b) => a - b,
+  "*": (a, b) => a * b,
+  "/": (a, b) => a / b,
+  "^": (a, b) => Math.pow(b, a)
+}
+
 const helpMsg = `
   \r${_B}RPN${B_}: evaluates postfix expressions
   \rusage: ${_B}RPN${B_} <expression>
@@ -24,25 +32,23 @@ const quit = msg => {
   process.exit(0)
 }
 
-const run = expr => {
+const calculate = expr => {
   const errorMsg = `invalid expression: ${_B}"${expr}"${B_}`  
   const stack = []
 
   !Array.isArray(expr) && quit(errorMsg)
 
-  for(let i = 0; i < expr.length; i += 1) {    
-    if (!isNaN(expr[i]) && isFinite(expr[i])) stack.push(expr[i])
-    else {
-      let res = false
-      let a = stack.pop()
-      let b = stack.pop()
+  for(let i = 0; i < expr.length; i += 1) { 
+    const current = expr[i]   
 
-      // TODO make faster?      
-      if(expr[i] === "+") res = (parseInt(a) + parseInt(b))
-      else if(expr[i] === "-") res = (parseInt(b) - parseInt(a))
-      else if(expr[i] === "*") res = (parseInt(a) * parseInt(b))
-      else if(expr[i] === "/") res = (parseInt(b) / parseInt(a))
-      else if(expr[i] === "^") res = (Math.pow(parseInt(b), parseInt(a)))
+    if (!isNaN(current) && isFinite(current)) stack.push(current)
+    else {
+      const a = parseInt(stack.pop())
+      const b = parseInt(stack.pop())
+      let res = false
+
+      // TODO use .?.?.?.? whatever its called
+      if (operators[current]) res = operators[current](a, b)
 
       !res && quit(errorMsg)
       stack.push(res)
@@ -51,7 +57,8 @@ const run = expr => {
 
   (stack.length > 1) && quit(errorMsg)
   return `result: ${_B}${stack[0]}${B_}`
+  // || return the actual number if specified
 }
 
 !((process.argv.slice(2)).length) && quit(`input cannot be empty`)
-console.log(run(process.argv.slice(2)))
+console.log(calculate(process.argv.slice(2)))

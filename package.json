@@ -7,5 +7,5 @@
     "rpn": "./index.js"
   },
   "keywords": ["rpn", "postfix", "cli", "terminal", "calculator", "math"],
-  "license": "GPLv3"
+  "license": "MIT"
 }
