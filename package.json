@@ -6,6 +6,9 @@
   "bin": {
     "rpn": "./index.js"
   },
+  "scripts": {
+    "test": "./test.js"
+  },
   "keywords": ["rpn", "postfix", "cli", "terminal", "calculator", "math"],
   "license": "MIT"
 }
