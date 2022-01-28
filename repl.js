@@ -3,9 +3,17 @@
 const { createInterface } = require('readline')
 
 let stack = []
-let lastResult = false
+let lastValid = ''
+
+const quit = (code = 0) => process.exit(code)
+const validNum = n => !isNaN(parseFloat(n)) && isFinite(n)
+const x1b = (msg, color = 1) => `\x1b[1m\x1b[38;5;${color}m${msg}\x1b[0m`
 
 const cursor = '| '
+const divider = '------------------'
+const commandsMsg = `commands: ${x1b('q', 49)}(uit), ${x1b('r', 51)}(eset), ${x1b('h', 57)}(elp)\n`
+const initMsg = `\n${divider}\n${x1b('rpn calc v0.0.1', 128)}\n${divider}\n${commandsMsg}\n`
+
 const operators = {
   '+': (a, b) => a + b,
   '-': (a, b) => a - b,
@@ -13,66 +21,53 @@ const operators = {
   '/': (a, b) => a / b
 }
 
-const x1b = (msg, color = 1) => `\x1b[1m\x1b[38;5;${color}m${msg}\x1b[0m`
-const quit = (code = 0) => process.exit(code)
-const isNum = n => !isNaN(parseFloat(n)) && isFinite(n)
-
-const error = msg => { 
-  if (msg) console.log(x1b(msg))
+const error = (msg = 'error') => { 
+  console.log(x1b(msg))
   return false
 }
 
 const evaluate = input => {
-  // TODO change
-  const expr = input.trim().split(/[ ]+/)
+  const expr = input.split(' ').filter(i => i.length && i !== ' ')
   const len = expr.length
 
   for (let i = 0; i < len; i += 1) {
     const char = expr[i]
-    const isNumber = isNum(char)
-    const isOperator = operators[char]
-    if (!isNumber && !isOperator) return error(`Invalid syntax: ${char}`)
+    const isNum = validNum(char)
+    const isOpr = operators[char]
 
-    if (isNumber) stack.push(parseFloat(char))
-    
-    else if (isOperator) {
+    if (!isNum && !isOpr) return error(`Invalid syntax: ${char}`)
+        
+    if (isNum) stack.push(parseFloat(char))
+
+    else if (isOpr) {
       if (stack.length > 1) {
         const localStack = [...stack]
         const b = localStack.pop()
         const a = localStack.pop()
         const calculated = operators[char](a, b)
-        
-        if (!isNum(calculated)) return error(`Illegal operation: ${a} ${char} ${b}`)
-        stack = localStack
-        stack.push(calculated)
+        if (!validNum(calculated)) return error(`Illegal operation: ${a} ${char} ${b}`)
+        localStack.push(calculated)
+        stack = localStack  
       }
+      
       else if (stack.length === 1) {
-        console.log(`
-          \r${x1b('stack has one element:', 8)} ${x1b(lastResult, 6)}
-          \rspecs:
-          \rincomplete count ${len - i}
-          \rtotal len ${len}
-          \rbroke at iteration ${i}
-        `)
-        
-        if (!lastResult) return ''
-        return lastResult
+        lastValid = stack
+        let msg = `${x1b('stack has one item:', 8)} ${x1b(lastValid[0], 6)}`
+        if (i > 0) msg += `\ncould not evaluate ${x1b(len - i, 6)} out of ${x1b(len, 6)} arguments passed`
+        return error(msg)
       }
       
       else if (stack.length < 1) {
         let msg = x1b('Stack is empty', 8)
-        if (lastResult) msg += `${x1b(' last result:', 8)} ${x1b(lastResult, 6)}`
-        console.log(msg)
-
-        if (!lastResult) return ''
-        return lastResult
+        if (lastValid) msg += `${x1b(' last result:', 8)} ${x1b(lastValid[0], 6)}`
+        return error(msg)
       }
     }
   }
 
-  return stack
+  lastValid = stack
+  return true
 }
-
 
 //////////
 
@@ -82,27 +77,34 @@ const rl = createInterface({
   prompt: cursor
 })
 
+const keyMap = {
+  'q': () => quit(),
+  'r': () => {
+    stack = []
+    lastValid = ''
+    console.log('reset stack')
+  },
+  'h': () => console.log('help')
+}
+
 rl.input.on('keypress', (char, props) => {
-  if (props.name === 'q' && props.ctrl) {
-    console.log()
-    quit()
-  }
+  process.stdin.pause()
+  if (keyMap[props.name]) keyMap[props.name]()
+  process.stdin.resume()
 })
 
 rl.on('line', line => {
   if (line.length) {
     const result = evaluate(line)
-    if (result) {
-      lastResult = result
-      console.log(`${cursor}${x1b(result, 4)}`)
-    }
+    console.log(`${cursor}${x1b(lastValid, 4)}`)
   }
   rl.prompt()
 })
 
 process.on('exit', () => {
   rl.close()
-  console.log(x1b('GOODBYE'))
+  console.log(x1b('\nquit', 10))
 })
 
+console.log(initMsg)
 rl.prompt()
