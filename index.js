@@ -1,30 +1,5 @@
 #!/usr/bin/env node
 
-// TODO getopts
-// 
-// invoked with ...
-// (no args)              = repl
-// rpn 4 4 +              = once
-// echo "4 4 +" | rpn     = once
-// 
-// --help, -h
-//   show this message and exit
-// 
-// --ignore-errors -i
-//   return the array on error
-// 
-// --format -f
-//   str =      'result: n'
-//   num =           number
-//   both =    { str, num }
-// 
-// --trace -t
-//   show step-by-step what is being evaluated
-//   ex: https://www.free-online-calculator-use.com/postfix-evaluator.html
-//
-// --examples -e
-//   show examples
-
 const _B = '\x1b[1m'
 const B_ = '\x1b[0m'
 
@@ -34,11 +9,10 @@ usage: ${_B}rpn${B_} <exp>
 `
 
 const operators = {
-  "+": (a, b) => a + b,
-  "-": (a, b) => a - b,
-  "*": (a, b) => a * b,
-  "/": (a, b) => a / b,
-  "^": (a, b) => Math.pow(b, a)
+  '+': (a, b) => a + b,
+  '-': (a, b) => a - b,
+  '*': (a, b) => a * b,
+  '/': (a, b) => a / b
 }
 
 const quit = msg => {
@@ -56,7 +30,7 @@ const calculate = expr => {
   for(let i = 0; i < expr.length; i += 1) { 
     const current = expr[i]   
 
-    if (!isNaN(current) && isFinite(current)) stack.push(current)
+    if (!isNaN(parseFloat(current)) && isFinite(current)) stack.push(current)
     else {
       const a = parseInt(stack.pop())
       const b = parseInt(stack.pop())
