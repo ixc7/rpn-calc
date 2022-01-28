@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { fork } = require('child_process')
+import { fork } from 'child_process'
 
 const test = input => {
   const child = fork('./index.js', input, { stdio: ['ignore', 'ignore', 'ignore', 'ipc'] })

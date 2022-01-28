@@ -47,6 +47,7 @@ const calculate = expr => {
   return `result: ${_B}${stack[0]}${B_}`  
 }
 
+
 // TODO accept single string w/ args
 !((process.argv.slice(2)).length) && quit(`input cannot be empty`)
 console.log(calculate(process.argv.slice(2)))

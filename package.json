@@ -2,6 +2,7 @@
   "name": "rpn-calc",
   "version": "0.0.1",
   "description": "Command line RPN calculator",
+  "type": "module",
   "main": "./index.js",
   "bin": {
     "rpn": "./index.js"
