@@ -29,7 +29,7 @@ const helpTxt = () => console.log(`
   \r${xb('help', 57)}: prints this message
 `)
 
-const evaluate = (input, stack = [], silent = false) => {
+const evaluate = (input, stack = []) => {
   const initial = [...stack]
   const expr = input.split(' ').filter(i => i.length && i !== ' ')
   const len = expr.length
