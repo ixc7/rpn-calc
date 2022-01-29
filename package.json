@@ -1,0 +1,11 @@
+{
+  "name": "rpn-calc",
+  "version": "0.0.1",
+  "description": "Command line RPN calculator",
+  "main": "./bin/index.js",
+  "bin": {
+    "rpn": "./bin/index.js"
+  },
+  "keywords": ["rpn", "postfix", "cli", "terminal", "calculator", "math"],
+  "license": "GPLv3"
+}
