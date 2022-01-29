@@ -1,12 +1,16 @@
 {
   "name": "rpn-postfix-cli",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Command line RPN calculator",
   "type": "module",
-  "main": "./index.js",
+  "main": "index.js",
   "bin": {
     "rpn": "./index.js"
   },
-  "keywords": ["rpn", "postfix", "cli", "terminal", "calculator", "math"],
-  "license": "MIT"
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ixc7/rpn-calc.git"
+  },
+  "license": "MIT",
+  "keywords": ["rpn", "postfix", "cli", "terminal", "calculator", "math"]
 }

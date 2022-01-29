@@ -15,7 +15,7 @@ const vlog = msg => verbose && console.log(msg)
 const validNum = n => !isNaN(parseFloat(n)) && isFinite(n)
 const xb = (msg, color = 1) => `\x1b[1m\x1b[38;5;${color}m${msg}\x1b[0m`
 const cmdsTxt = `commands: ${xb('q', 49)}(uit), ${xb('r', 124)}(eset), ${xb('s', 66)}(tack), ${xb('v', 46)}(erbose), ${xb('h', 57)}(elp)`
-const startTxt = `\n${xb(`${divider}\nrpn calc v0.0.3\n${divider}`, 128)}\n${cmdsTxt}\n`
+const startTxt = `\n${xb(`${divider}\nrpn calc v0.0.4\n${divider}`, 128)}\n${cmdsTxt}\n`
 
 const helpTxt = () => console.log(`
   \r${divider}
