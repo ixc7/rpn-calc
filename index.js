@@ -1,128 +1,28 @@
 #!/usr/bin/env node
 
-import { createInterface } from 'readline'
+import { repl, evaluate, helpTxt } from './rpn.js'
 
-const cursor = '| '
-const divider = '------------------'
-const operators = {
-  '+': (a, b) => a + b,
-  '-': (a, b) => a - b,
-  '*': (a, b) => a * b,
-  '/': (a, b) => a / b,
-}
+const args = process.argv.slice(2)
 
-let verbose = false
-const validNum = n => !isNaN(parseFloat(n)) && isFinite(n)
-const xb = (msg, color = 1) => `\x1b[1m\x1b[38;5;${color}m${msg}\x1b[0m`
-const cmdsTxt = `commands: ${xb('q', 49)}(uit), ${xb('r', 124)}(eset), ${xb('s', 66)}(tack), ${xb('v', 46)}(erbose), ${xb('h', 57)}(elp)`
-const startTxt = `\n${xb(`${divider}\nrpn calc v0.0.1\n${divider}`, 128)}\n${cmdsTxt}\n`
-const vlog = msg => verbose && console.log(msg)
+if (!args.length) repl()
+else {
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log(`
+      \rrpn-postfix-cli: evaluates postfix expressions
 
-const evaluate = (input, stack = [], silent = false) => {
-  const initial = [...stack]
-  const expr = input.split(' ').filter(i => i.length && i !== ' ')
-  const len = expr.length
+      \rusage:
+      \r       \x1b[1mrpn\x1b[0m [expression]
 
-  const error = (msg = 'error', color = 124, lastResult = initial) => {
-    console.log(`${cursor}${xb(msg, color)}`)
-    return lastResult
+      \roptions:
+      \r       --help, -h: prints this message
+      
+      \rif no arguments are passed, opens an interactive repl in current shell `)
+    helpTxt()
+    process.exit(0)
   }
 
-  vlog(xb(`\n${divider}\nargs: ${len}\n${divider}`, 4))
-
-  for (let i = 0; i < len; i += 1) {
-    const char = expr[i]
-    const isNum = validNum(char)
-    const isOpr = operators[char]
-
-    if (!isNum && !isOpr) return error(xb(`Invalid syntax: ${char}`))
-
-    vlog(`\n${xb(`[${i + 1}/${len}]`, 20)} char: ${xb(expr[i], 15)}, stack: ${xb(JSON.stringify(stack), 15)}`)
-
-    if (isNum) {
-      stack.push(parseFloat(char))
-      vlog(`pushed ${xb(char, 33)}`)
-    }
-
-    else if (isOpr) {
-      if (stack.length > 1) {
-        // validate copy before modifying
-        const localStack = [...stack]
-        const b = localStack.pop()
-        const a = localStack.pop()
-        const calculated = operators[char](a, b)
-
-        if (!validNum(calculated)) return error(`Illegal operation: ${a} ${char} ${b}`)
-        vlog(`calculated ${a} ${char} ${b} = ${xb(calculated, 33)}`)
-
-        localStack.push(calculated)
-        stack = localStack
-      }
-      else if (stack.length === 1) {
-        let msg = `cant use an operator on single number: ${xb(stack[0], 24)}`
-        if (i > 0) msg += `\n${cursor}could not evaluate ${xb(len - i, 125)} out of ${xb(len, 125)} arguments passed`
-        
-        // return what was evaluated up to this block
-        return error(msg, 7, stack)
-      }
-      else if (stack.length < 1) return error('Stack is empty')
-    }
-  }
-  
-  vlog(xb(`\n${divider}\nok\n${divider}\n`, 77))
-  return stack
+  const result = evaluate(args.join(' '))
+  if (result.length === 1) console.log(`result: \x1b[1m${result[0].toString()}\x1b[0m`)
+  else if (result.length) console.log(`results: \x1b[1m[${result.join(', ')}]\x1b[0m`)
+  else console.log('for more information, run \x1b[1mrpn --help\x1b[0m')
 }
-
-const repl = () => {
-  let replStack = []
-
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    prompt: cursor
-  })
-
-  const keyMap = {
-    'h': () => {
-      // TODO
-      console.log(`${cursor}${cmdsTxt}`)
-    },
-    'r': () => {
-      replStack = []
-      console.log(`\x1Bc\x1b[3J\n${cursor}${xb('reset stack', 11)}\n${cursor}${cmdsTxt}`)
-    },
-    's': () => {
-      if (!replStack.length) console.log(`${cursor}${xb('stack is empty', 125)}`)
-      else console.log(`${cursor}${xb(replStack, 4)}`)
-    },
-    'v': () => {
-      verbose = !verbose
-      let color = 124
-      if (verbose) color = 15
-      console.log(`${cursor}verbose logging: ${xb(verbose, color)}`)
-    },
-    'q': () => process.exit(0)
-  }
-
-  rl.input.on('keypress', (char, props) => {
-    if (keyMap[props.name]) {
-      rl.clearLine(0)
-      keyMap[props.name]()
-      rl.prompt()
-    }
-  })
-
-  rl.on('line', line => {
-    if (line.length) {
-      replStack = evaluate(line, replStack)
-      console.log(`${cursor}${xb(replStack, 4)}`)
-    }
-    rl.prompt()
-  })
-
-  process.on('exit', () => console.log(xb('\nquit', 10)))
-  console.log(startTxt)
-  rl.prompt()
-}
-
-export { evaluate, repl }
