@@ -8,7 +8,7 @@ const operators = {
   '+': (a, b) => a + b,
   '-': (a, b) => a - b,
   '*': (a, b) => a * b,
-  '/': (a, b) => a / b,
+  '/': (a, b) => a / b
 }
 let verbose = false
 const vlog = msg => verbose && console.log(msg)
@@ -53,9 +53,7 @@ const evaluate = (input, stack = []) => {
     if (isNum) {
       stack.push(parseFloat(char))
       vlog(`pushed ${xb(char, 33)}`)
-    }
-
-    else if (isOpr) {
+    } else if (isOpr) {
       if (stack.length > 1) {
         // validate copy before modifying
         const localStack = [...stack]
@@ -68,18 +66,16 @@ const evaluate = (input, stack = []) => {
 
         localStack.push(calculated)
         stack = localStack
-      }
-      else if (stack.length === 1) {
+      } else if (stack.length === 1) {
         let msg = `cant use an operator on single number: ${xb(stack[0], 24)}`
         if (i > 0) msg += `\n${cursor}could not evaluate ${xb(len - i, 125)} out of ${xb(len, 125)} arguments passed`
-        
+
         // return what was evaluated up to this block
         return error(msg, 7, stack)
-      }
-      else if (stack.length < 1) return error('Stack is empty')
+      } else if (stack.length < 1) return error('Stack is empty')
     }
   }
-  
+
   vlog(xb(`\n${divider}\nok\n${divider}\n`, 77))
   return stack
 }
@@ -94,22 +90,22 @@ const repl = () => {
   })
 
   const keyMap = {
-    'h': helpTxt,
-    'r': () => {
+    h: helpTxt,
+    r: () => {
       replStack = []
       console.log(`\x1Bc\x1b[3J\n${cursor}${xb('reset stack', 11)}\n${cursor}${cmdsTxt}`)
     },
-    's': () => {
+    s: () => {
       if (!replStack.length) console.log(`${cursor}${xb('stack is empty', 125)}`)
       else console.log(`${cursor}${xb(replStack, 4)}`)
     },
-    'v': () => {
+    v: () => {
       verbose = !verbose
       let color = 124
       if (verbose) color = 15
       console.log(`${cursor}verbose logging: ${xb(verbose, color)}`)
     },
-    'q': () => process.exit(0)
+    q: () => process.exit(0)
   }
 
   rl.input.on('keypress', (char, props) => {
